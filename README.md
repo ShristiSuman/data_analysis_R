@@ -1,2 +1,3 @@
-# Data Analysis - R
+# Data Analysis
+Applied Data Analysis using R
 
