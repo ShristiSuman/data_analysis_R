@@ -1,0 +1,498 @@
+---
+title: "TTP 201 - Homework 1"
+author: "Shristi Suman"
+date: "April 17 2024"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+## Use this chunk to load packages or external R scripts
+#install.packages("ggplot2")
+#install.packages("lubridate")
+```
+
+## Question 1
+
+Write the any answers here. Use code chunks to run and/or show R code.
+Set echo to `TRUE` if you want to print the code in the output file
+
+Truth Table
+```{r}
+
+#Please complete the following table (& is the “and” operator, | is the “or” operator, 
+# and ! is the “not” operator):
+  
+# Creating the table layout
+table_layout <- data.frame(
+  a = c("T", "T", "T", "T", "F", "F", "F", "F"),
+  b = c("T", "T", "F", "F", "T", "T", "F", "F"),
+  c = c("T", "F", "T", "F", "T", "F", "T", "F"),
+  `a&b` = c('T', 'T', 'F', 'F', 'F', 'F', 'F', 'F'),
+  `(a&b)|c` = c('T', 'T', 'T', 'F', 'T', 'F', 'T', 'F'),
+  `a&(b|c)` = c('T', 'T', 'T', 'F', 'F', 'F', 'F', 'F'),
+  `a&(!b|c)` = c('T', 'F', 'T', 'T', 'F', 'F', 'F', 'F'),
+  `a&!(b|c)` = c('F', 'F', 'F', 'T', 'F', 'F', 'F', 'F'),
+  `!a|!(b&c)` = c('F', 'T', 'T', 'T', 'T', 'T', 'T', 'T'),
+  check.names = FALSE
+)
+
+# Display the table layout
+print(table_layout)
+
+```
+
+
+## Question 2
+
+Function 1 :
+
+Input: The first function (function1) accepts a single input, which is expected to be a vector or a list containing numeric values.
+
+Explanation of the entire process:
+1) Initializing an empty vector named output.
+2) Iterating over each element n in the input vector.
+3) For each element, checking if it is divisible by 2, i.e. n%2==0. If it is the case then appending n to the output vector
+4) After iterating over all elements in the input vector, the function is returning the output vector which contains only the even numbers.
+
+Output: The function returns a vector containing only the even numbers from the input vector.
+
+
+
+Function 2:
+
+Two functions are present isPrime and function2. isPrime is being called inside function function2.
+
+For isPrime:
+
+Input: The function isPrime accepts a single integer input x.
+
+Explanation of the entire process:
+1) If the input x is less than 2, FALSE is returned. This aligns with the fact that prime numbers must be greater than 1. 
+2) If the input x is exactly equal to 2, TRUE is returned. This is because 2 is a prime number.
+3) For input value greater than 2, a loop iterates from 2 up to the square root of x. Checking for values up to square root of a particular number ensures that we check all possible divisors without unnecessary overhead, thereby increasing the efficiency.
+  For each value of n in the loop, it is checked if x is completely divisible by n without any remainder, i.e. x%n==0. If it is so, FALSE is returned. This indicates that x is not actually prime. 
+4) If no factors are found after ending the loop, TRUE is returned. This indicates that x is prime.
+
+Output: It returns a boolean value indicating whether x is a prime number (TRUE) or not (FALSE).
+
+
+For function2:
+
+Input: The second function (function2) accepts a single integer input as its argument. This integer represents the upper limit for the range of numbers to check for prime numbers.
+
+Explanation of the entire process:
+1) A variable output is initialized with the value 0. 
+2) A for loop is used to iterate over each integer n from 1 to the input value.
+   For each value of n, isPrime function is called to check if n is a prime number or not. If TRUE is returned by isPrime, then the output variable is incremented by value of 1.
+3) After iterating over all numbers up tp the input value, the final count of prime numbers which is stored in the output variable is returned.
+
+Output: The function returns an integer representing the count of prime numbers within the range from 1 to the input value.
+
+
+String method
+```{r }
+sum_of_digits_string <- function(n){
+  string_digits <- as.character(n)
+  split_digits <- strsplit(string_digits, "")[[1]]
+  numeric_digits <- as.numeric(split_digits)
+  digits_sum <- sum(numeric_digits)
+  return (digits_sum)
+}
+
+a <- sum_of_digits_string(123)
+print(paste("Sum of digits using string: ",a))
+```
+
+Modulus operation method
+```{r }
+sum_of_digits_modulus <- function(n){
+  sum <- 0
+  while (n>0){
+    rem = n %% 10
+    sum = sum + rem
+    n = n %/% 10
+  }
+  return (sum)
+}
+b <- sum_of_digits_modulus(678)
+print(paste("Sum of digits using modulus: ",b))
+
+```
+
+Time Taken for each type
+```{r}
+# Measure time for function using string manipulation
+time_string <- system.time(sum_of_digits_string(9845312597532468))
+print(paste("Time taken for string manipulation function:"))
+print(time_string)
+
+# Measure time for function using modulus operator
+time_modulus <- system.time(sum_of_digits_modulus(9845312597532468))
+print(paste("Time taken for modulus operator function:"))
+print(time_modulus)
+
+```
+
+Here the string function has been observed to take more time than modulus operation. 
+
+In general the modulus operator method works faster due to fewer operations and conversions between data types. We can directly manipulate the number mathematically. 
+On the other hand, for string method, we convert number into string, then split into individual digits and finally convert each digit back to number for addition. This ends up taking more time.
+
+However, the actual performance may depend on factors such as the size of the input number. For a very large number, repeatedly dividing by 10 to extract each digit could potentially result in a large number of iterations in the loop. However, converting the number to a string and then iterating over the characters in the string might be more efficient in terms of execution time.
+
+## Question 3
+
+Loading data
+```{r}
+#Load the data into R (do not manually modify before loading!)
+# Loading data
+data <- read.table("fuelingData.txt")
+
+# Viewing top rows
+head(data)
+
+```
+
+Cleaning Data
+```{r}
+#Please clean the dataset (in R), make sure values are in the correct columns
+#(some values are swapped between columns).
+
+# Merging columns 2 and 3 as well as 4 and 5 to have proper columns
+data$Gasoline_Consumption <- paste(data$V2, data$V3)
+data$Distance <- paste(data$V4, data$V5)
+
+# Dropping the unnecessary columns
+data <- data[, c(1, 6, 7)]
+
+# Renaming the columns
+colnames(data) <- c("Price_of_Gasoline", "Gasoline_Consumption",
+                    "Distance_Travelled")
+head(data)
+
+# Identify the rows where values need to be swapped
+swap_rule <- grepl("mi", data$Gasoline_Consumption) & 
+             grepl("gal", data$Distance_Travelled)
+
+#Checking the rows with discrepancy
+print(head(data[swap_rule, ]))
+
+# Swap the values between the columns
+temp_data <- data$Gasoline_Consumption[swap_rule]
+data$Gasoline_Consumption[swap_rule] <- data$Distance_Travelled[swap_rule]
+data$Distance_Travelled[swap_rule] <- temp_data
+
+head(data)
+```
+
+Odometer column
+```{r}
+#Create a column that indicates when the odometer is working and when it is not
+#(e.g. a column with a binomial outcome: 0 or 1, TRUE or FALSE, or Yes or No).
+
+data$Odometer_Working <- ifelse(grepl("\\?", data$Distance_Travelled), 0, 1)
+
+#Checking rows where odometer is not working
+rows_with_odometer_issue <- data[data$Odometer_Working == 0, ]
+print(rows_with_odometer_issue)
+
+```
+
+Conversion to numeric data type
+```{r}
+#Change all columns to numeric data type (remove all characters and symbols).
+
+#check data type of columns
+str(data)
+
+clean_and_convert_data <- function(x) {
+  # Leave only numbers and decimal points
+  clean_data <- gsub("[^0-9.]", "", x)
+  # Numeric data type conversion
+  numeric_data <- as.numeric(clean_data)
+  return(numeric_data)
+}
+
+data <- as.data.frame(apply(data, 2, clean_and_convert_data))
+
+#Validate data
+str(data)
+head(data)
+```
+
+MPG Column
+```{r}
+#Create a column “MPG” indicating the fuel efficiency of driving between 
+#each fueling event.
+
+data$MPG <- data$Distance_Travelled / data$Gasoline_Consumption
+head(data)
+
+```
+
+Total fueling cost column
+```{r}
+#Create a column for the total fueling cost for each fuel up event
+data$Total_Fuel_Cost <- data$Price_of_Gasoline * data$Gasoline_Consumption
+head(data)
+```
+
+Some stats
+```{r}
+#What is the total mileage, total gasoline consumed, total cost of gasoline,
+#and average MPG across the full dataset?
+
+total_mileage <- sum(data$Distance_Travelled)
+total_gasoline_consumed <- sum(data$Gasoline_Consumption)
+total_gasoline_cost <- sum(data$Total_Fuel_Cost)
+average_mpg <- mean(data$MPG, na.rm = TRUE)
+
+# Displaying the results
+cat("Total Mileage:", total_mileage, "miles\n")
+cat("Total Gasoline Consumed:", total_gasoline_consumed, "gallons\n")
+cat("Total Cost of Gasoline: $", total_gasoline_cost, "\n")
+cat("Average MPG:", average_mpg, "miles per gallon\n")
+```
+
+Scatterplot
+```{r}
+#Generate a scatter plot of gallons of gasoline consumed and miles traveled for each fueling event.
+
+library(ggplot2) 
+
+# Generating the scatter plot
+ggplot(data, aes(x = Gasoline_Consumption, y = Distance_Travelled)) +
+  geom_point() +
+  labs(x = "Gasoline Consumption (gallons)", y = "Distance Travelled (miles)",
+       title = "Scatterplot of Gasoline Consumption vs. Distance Travelled")
+
+```
+
+Fuel efficiency
+```{r}
+#Cost per mile
+cost_per_mile_doris <- sum(data$Price_of_Gasoline * data$Gasoline_Consumption) / sum(data$Distance_Travelled)
+# Print the results
+print(paste("Cost per mile for Doris:", cost_per_mile_doris))
+```
+
+## Question 4
+
+Load and Numeric Conversion
+```{r}
+#Load the data into R (do not manually modify before loading!) and similar to 
+#Problem 3, change all columns to numeric data type (removing all characters 
+#and symbols) except for the date which should be changed to a date type.
+
+data <- read.table("fuelingData_Claire.txt", header=FALSE, fill=TRUE)
+head(data)
+
+data$Gasoline_Consumption <- paste(data$V3, data$V4)
+data$Distance <- paste(data$V5, data$V6)
+data$mpg <- paste(data$V7,data$V8)
+data <- data[, c(1, 2, 9, 10,11)]
+colnames(data) <- c("Date","Price_of_Gasoline", "Gasoline_Consumption","Distance_Travelled","Claire_mpg")
+head(data)
+
+numeric_cols <- colnames(data)[!(colnames(data) %in% c("Date"))]
+
+#Clean and convert
+clean_and_convert_data <- function(x) {
+  # Leave only numbers and decimal points
+  clean_data <- gsub("[^0-9.]", "", x)
+  # Numeric data type conversion
+  numeric_data <- as.numeric(clean_data)
+  return(numeric_data)
+}
+
+data[numeric_cols] <- lapply(data[numeric_cols], clean_and_convert_data)
+data$Date <- as.Date(data$Date, format = "%m/%d/%Y")
+head(data)
+
+```
+
+Data cleaning - NA values remove
+```{r}
+#Removing na rows
+rows_with_na <- sum(is.na(data$Claire_mpg))
+print(paste("Rows with na value before removal: ",rows_with_na))
+data <- data[complete.cases(data$Claire_mpg), ]
+rows_with_na <- sum(is.na(data$Claire_mpg))
+print(paste("Rows with na value after removal: ",rows_with_na))
+```
+
+MPG Column
+
+Assuming that that the odometer reading is recorded when the fuel is consumed entirely i.e. it indicates that fuel added at each refueling event is entirely consumed before the subsequent refueling and the difference in odometer readings between consecutive refueling events represents the distance traveled during that interval.
+Dividing this distance/ Amount of fuel consumed during the same period => MPG
+```{r}
+#Create a column “MPG” indicating the overall fuel efficiency of driving 
+#(include both electricity and gasoline) and compare it to the values reported by Claire. 
+#Do the efficiencies match?
+
+# Started with 0 since we do not have previous data for calculating distance traveled since
+data$MPG <- 0  # Create a new column for MPG
+
+# Looping from second row 
+for (i in 2:nrow(data)) {
+  # Calculating distance traveled since last time gasoline was filled
+  distance_since_last <- data$Distance_Travelled[i] - data$Distance_Travelled[i - 1]
+  
+  data$MPG[i] <- distance_since_last / data$Gasoline_Consumption[i - 1]
+}
+
+# Compare overall MPG with Claire's reported MPG
+comparison <- data.frame(
+  Date = data$Date,
+  Overall_MPG = data$MPG,
+  Claire_MPG = data$Claire_mpg,
+  Match = data$MPG == data$Claire_mpg
+)
+
+head(comparison)
+```
+The efficiencies did not match. The discrepancy could be due to several factors such as inaccuracies in data recording, differences in calculation methods or errors in data processing.
+
+
+Cost per mile :
+The distance traveled can be calculated by subtracting the last odometer reading with the first odometer reading. 
+In calculating the total cost of gasoline consumed, we multiply the cost per gallon by the amount of gasoline consumed. However, to ensure accuracy, we consider only the gasoline that has been used to propel the vehicle over a certain distance. Since the last row in our dataset represents the most recent refueling event, the gasoline from this event has not yet been consumed for driving. Therefore, we exclude this row from our calculations to accurately reflect the gasoline usage and cost associated with the distance traveled.
+```{r}
+# For Claire
+
+# Finding the first and last entries
+first_entry <- data[1, ]
+last_entry <- data[nrow(data), ]
+# Retrieving the distance values for first and last entry
+distance_first <- first_entry$Distance_Travelled
+distance_last <- last_entry$Distance_Travelled
+# Calculating the total distance traveled by Claire
+total_distance_traveled <- distance_last - distance_first
+print(paste("Total distance traveled: ",total_distance_traveled))
+
+# Excluding the last row
+data_except_last <- data[-nrow(data), ]
+# Multiplying Price_of_Gasoline and Gasoline_Consumption columns except for the last row
+total_cost <- sum(data_except_last$Price_of_Gasoline * data_except_last$Gasoline_Consumption)
+print(paste("Total cost consumed: ",total_cost))
+
+cost_per_mile_claire <- total_cost/total_distance_traveled
+print(paste("Cost per mile for Claire:", cost_per_mile_claire))
+```
+The cost per mile for Doris was found to be 0.115356777372792 and for Claire was found to be 0.0658517990337171.
+The difference in cost per mile may be due to variations in fuel efficiency, gasoline prices, or driving habits. Factors such as vehicle efficiency could also play a role as Claire has hybrid vehicle whereas Doris did not have one.
+
+
+
+## Question 5
+
+Loading dataset
+```{r }
+# Mackayla Charging
+mackayla_charging <- read.csv("mackayla_charging_clean.csv")
+head(mackayla_charging)
+str(mackayla_charging)
+numeric_cols_charging <- colnames(mackayla_charging)[!(colnames(mackayla_charging) %in% 
+                                                         c("Date", "Start.Time", "End.Time"))]
+print(numeric_cols_charging)
+
+# Mackayla Trips
+mackayla_trips <- read.csv("mackayla_trips_clean.csv")
+head(mackayla_trips)
+str(mackayla_trips)
+numeric_cols_trips <- colnames(mackayla_trips)[!(colnames(mackayla_trips) %in% 
+                                                c("Date", "Start.Time"))]
+print(numeric_cols_trips)
+```
+
+Data Processing
+```{r}
+#Clean and convert
+clean_and_convert_data <- function(x) {
+  # Leave only numbers and decimal points
+  clean_data <- gsub("[^0-9.]", "", x)
+  # Numeric data type conversion
+  numeric_data <- as.numeric(clean_data)
+  return(numeric_data)
+}
+
+# Conversion to numeric
+mackayla_charging[numeric_cols_charging] <- lapply(mackayla_charging[numeric_cols_charging], 
+                                                   clean_and_convert_data)
+head(mackayla_charging)
+str(mackayla_charging)
+
+mackayla_trips[numeric_cols_trips] <- lapply(mackayla_trips[numeric_cols_trips], 
+                                             clean_and_convert_data)
+head(mackayla_trips)
+str(mackayla_trips)
+```
+
+# DateTime 
+```{r}
+# Combining date time
+library(lubridate)
+
+mackayla_charging$Start.DateTime <- mdy_hm(paste(mackayla_charging$Date, mackayla_charging$Start.Time))
+mackayla_charging$End.DateTime <- mdy_hm(paste(mackayla_charging$Date, mackayla_charging$End.Time))
+mackayla_trips$Start.DateTime <- mdy_hm(paste(mackayla_trips$Date, mackayla_trips$Start.Time))
+# Removing unnecessary columns
+mackayla_charging <- subset(mackayla_charging, select = -c(Date, Start.Time, End.Time))
+mackayla_trips <- subset(mackayla_trips, select = -c(Date, Start.Time))
+
+head(mackayla_charging)
+str(mackayla_charging)
+head(mackayla_trips)
+str(mackayla_trips)
+```
+
+Cost and mileage
+```{r}
+# What is the total mileage reported in each dataset?
+charging_distance <- sum(mackayla_charging$Distance.Added)
+trips_distance <- sum(mackayla_trips$Distance)
+print(paste("Total mileage reported in charging dataset:", charging_distance, "miles"))
+print(paste("Total mileage reported in trips dataset:", trips_distance, "miles"))
+
+# How much total money was spent for all the miles?
+total_cost <- sum(mackayla_charging$Cost)
+print(paste("Total money spent for all miles: $", total_cost))
+
+# How does the cost per mile compare between MacKayla, Claire, and Doris?
+cost_per_mile_mackayla = sum(mackayla_charging$Cost)/sum(mackayla_charging$Distance.Added)
+print(paste("Cost per mile for MacKayla:", cost_per_mile_mackayla))
+```
+The cost per mile for Doris was found to be 0.115356777372792 ,for Claire was found to be 0.0658517990337171 and for Mackayla was found to be 0.0310411756550672.
+The difference in cost per mile value can be attributed to vehicle efficiency - Doris being older vehicle than other two or the type of fuel - Doris running solely on gasoline, Claire being a plug-in hybrid electric vehicle and MacKayla an all-electric vehicle. Electric vehicles generally have lower operating costs per mile compared to gasoline-powered vehicles.
+Gasoline prices and driving habits could also be the possible causes.
+
+Dot Plot
+```{r}
+# Provide a dot plot of distance (x) against energy used (y).
+library(ggplot2)
+
+ggplot(mackayla_trips, aes(x = Distance, y = Energy.Used)) + geom_point() +
+  labs(x = "Distance", y = "Energy Used") + ggtitle("Distance vs Energy Used")
+```
+
+Histogram
+```{r}
+#Provide a histogram of the energy efficiency values.
+library(ggplot2)
+
+ggplot(mackayla_trips, aes(x = Energy.Efficiency)) +
+  geom_histogram(binwidth = 1, fill = "green", color = "blue") +
+  labs(x = "Energy Efficiency", y = "Frequency") +
+  ggtitle("Histogram of Energy Efficiency Values")
+
+```
+
+```{r}
+# If energy used is known to be a correct quantity, what appears to be erroneous in the data?
+```
+Upon examining the provided dataset, it becomes apparent that certain data points exhibit irregularities that challenge their reliability. Entries showing similar energy usage (~0.1 units) but varying distances (ranging from 0.1 to 14 units) suggest discrepancies, contrary to the expected relationship between energy consumption and distance traveled. Notably, the entry reporting a distance of 4.6 units with no energy consumption seems implausible, as movement inherently requires energy expenditure. Suspiciously high energy efficiency values, like 125.5 or 279.6, deviate significantly from typical figures, hinting at potential errors in recording or outlier data points. Errors in data entry, sensor malfunctions, or misunderstandings regarding measurement units may be the cause for these anomalies. Consequently, doubts arise regarding the consistency and reliability of certain data records, prompting a need for further investigation.
