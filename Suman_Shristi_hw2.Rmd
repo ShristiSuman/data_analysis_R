@@ -1,0 +1,662 @@
+---
+title: "Suman_Shristi_hw2"
+output:
+  pdf_document:
+    latex_engine: xelatex  # or lualatex
+
+date: "2024-04-30"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+## Use this chunk to load packages or external R scripts
+#install.packages("ggplot2")
+#install.packages("dplyr")
+
+library(ggplot2)
+library(dplyr)
+```
+
+## Question 1
+
+Crack the code
+Provide a description for what each of the functions do:
+
+Function 1:
+
+In the function1 , there is use of the break statement. However, break is used to exit loops prematurely and in our function, there is no loop to exit prematurely. Therefore, the break statement is unnecessary and would result in a syntax error because it's used outside the context of a loop.We should remove the break statement and use return() to terminate the function.
+
+Input: The first function (function1) accepts a single input, which is expected to be an integer.
+
+Explanation of the entire process: 
+1) Checking if the provided input 'n' is an integer. If it is not, a message is printed saying "This function requires an integer input". 
+2) Initializing variables a to 1, out (the output variable) to 0, x to 0 and c to 2.
+3) Iterating in a while loop until c becomes less than or equal to 1. This helps us to determine whether we have processed all the digits of the input number n.
+a) In this while loop, c is calculated as the result of dividing n by 10 to the power of a. This shifts decimal point of n to the left by a places.
+b) The variable a is used to keep track of the current position of the digit being processed within the number n. a is incremented by 1 which effectively makes sure it moves to the next digit position
+c) The varaible out is used to count the number of digits in the input integer and thus is incremented by 1 after each digit is processed.
+4) Once the loop exits, the function returns the value stored in out, which represents the number of digits in the input integer n.
+
+Output: The function returns the number of digits in the input integer 'n'.
+
+
+
+Function 2:
+
+Input: The second function (function2) accepts a single input, which is expected to be an integer.
+
+Explanation of the entire process: 
+1) Checking if the provided input 'n' is an integer. If it is not, a message is printed saying "This function requires an integer input" and the function returns NULL.
+2) Taking the absolute value of n to ensure that negative numbers are treated the same as positive ones.
+3) Initializing the variables x to 0, e(the even count) to 0 and o(the odd count) to 0.
+3) Iterating in a while loop until n is greater than 0.
+a) In this while loop, finding the rightmost digit of n using the modulo operator (n %% 10) and storing it in the variable 'digit'.
+b) If the digit is divisible by 2 (digit%%2==0) then incrementing the count of e by 1 else incrementing the count of o by 1.
+c) Updating n by removing the rightmost digit using the floor(n/10) operation.
+4) Comparing the count of even(e) and odd(o) digits. If there are more even digits than odd then returing TRUE else returning FALSE.
+
+Output: The function returns a logical value indicating whether there are more even digits than odd digits in the input integer n. In this case, the output is TRUE if there are more even digits than odd digits, otherwise, it's FALSE.
+
+
+
+
+## Question 2
+A) What’s it mean?
+
+a) Provide the interpretation for education and age effect on overall wages.
+
+In the regression model provided, the coefficients for ed (education level) and age (age) represent the estimated effects of these variables on earnings (wages(i)).
+
+For education(ed):
+The cooefficient for ed is 4,467.916 with a standard error of 332.876.
+This coefficient indicates that, on average, for every additional unit of increase in education level, there is an associated increase of $4,467.92 in earnings, while holding all other variables constant.
+Moreover, the significance level of this coefficient is marked as p<0.01, indicating that the effect of education level on earnings is statistically significant.
+
+This suggests that higher education levels are associated with higher earnings, i.e.each additional unit of education contributes significantly to increasing wages.
+
+
+For age(age):
+The cooefficient for age is 247.483 with a standard error of 55.291.
+This coefficient indicates that, on average, for every additional year of age, there is an associated increase of $247.48 in earnings, while holding all other variables constant.
+Moreover, the significance level of this coefficient is marked as p<0.01, indicating that the effect of age on earnings is statistically significant.
+
+This suggests that older individuals tend to have higher earnings, i.e.each additional year of age contributes significantly to increasing wages.
+
+
+
+b) What are the base levels for each of the dummy/categorical variables? (Don’t forget about the inter-action term!). Provide the interpretation for the sex and race variables.
+
+In the regression model provided, the categorical variables sex and race are represented as dummy variables. 
+
+Base Levels:
+The base levels for each of these variables is typically chosen as the category that is not explicitly listed in the regression results.
+
+For Sex (sex):
+The variable sex has two categories namely male and female. In this case, the base level for sex is female, as the coefficient for male is provided in the results.
+Thus, the reference category for the sex variable is female.
+
+For Race (race):
+The variable sex has four categories namely white, black, hispanic, and other. In this case, the base level for race is white, as coefficients for black, hispanic, and other races are provided in the results.
+Therefore, the reference category for the race variable is white.
+
+Interpretation:
+For Sex(sex):
+The coefficient for factor(sex)male is 17,132.760 with a standard error of 1,615.571. This coefficient indicates the difference in earnings between males and females, while holding all other variables constant.
+Since, in our case, the base level for sex is female, the coefficient for factor(sex)male represents the average difference in earnings between males and females. The positive coefficient suggests that, on average, males earn approximately $17,132.76 more than females, while holding all other variables constant.
+Moreover, the significance level of this coefficient is marked as p<0.01, indicating that the difference in earnings between males and females is statistically significant.
+
+For Race(race):
+The coefficient for factor(race)black is -7,687.408 with a standard error of 8,807.304, for factor(race)hispanic is −18,342.970 with a standard error of 10,124.950 and for factor(race)other is −16,068.480 with a standard error of 14,790.700. These are compared to the base level white.
+For instance, the coefficient for factor(race)black is -7,687.408 with a standard error of 8,807.304. This coefficient indicates the difference in earnings between black individuals and white individuals, while holding all other variables constant.
+Similarly, coefficients for factor(race)hispanic and factor(race)other represent the differences in earnings between Hispanic and other race individuals, respectively, compared to white individuals.
+The negative coefficients suggests that, on average, black , hispanic and other race individuals earn less than white individuals.
+Moreover, the significance level for the coefficient of factor(race)hispanic is indicated as p<0.1, which suggests that the difference in earnings between Hispanic individuals and White individuals is statistically significant at the 10% level. The significance levels for rest of the coefficients are not provided and thus their interpretation would depend on their statistical significance, which is typically assessed using p-values.
+
+
+
+c) Provide the interpretation for the race-age interaction variables. What conclusion can we say about the difference in effect of age for each of the races? If the base level were changed would these conclusions still hold?
+
+The coefficients are provided for age:factor(race)black, age:factor(race)hispanic, and age:factor(race)other which represent the interaction between age and race. These interaction terms capture how the relationship between age and earnings varies across different racial groups.
+
+For instance, the coefficient for age:factor(race)black is 81.583 with a standard error of 188.693. This coefficient indicates the change in the effect of age on earnings for black individuals compared to the base level (which is typically white in this case), while holding all other variables constant. The positive coefficient indicates that, on average, the effect of age on earnings is greater for black individuals compared to the base level (which is typically white individuals). In simple terms, older black individuals experience a greater increase in earnings compared to older white individuals.
+
+Similarly, coefficients for age:factor(race)hispanic and age:factor(race)other represent the change in the effect of age on earnings for Hispanic and other race individuals, respectively, compared to the base level. Both of them also have positive coefficients signifying that the effect of age on earnings is higher for the respective racial group compared to the base group(white).
+
+
+If the base level for race were changed (e.g. from White to Hispanic), the conclusions regarding the difference in the effect of age for each race could change. The interpretation of the coefficients for the race-age interaction variables depends on the choice of the base level. Changing the base level would lead to different comparisons between racial groups, potentially altering the conclusions about the effect of age on earnings for each race.
+
+
+
+d) In providing these conclusions to the model, we have made some assumptions about the validity of the model. What additional considerations should we have made before making these interpretations?
+
+Some of the additional considerations to take into account before making these interpretations are as follows:
+1) We need to ensure that the assumptions of linear regression are met, including linearity, independence of errors, homoscedasticity (constant variance of errors) and normality of residuals.
+2) Assessing whether there is multicollinearity among the independent variables can be considered as these can affect the stability and interpretation of coefficients.
+3) If there is bias in sample selection then it can lead to biased estimates and incorrect conclusions.
+4) Identifying and assessing the impact of outliers on the regression results as they can unduly influence coefficient estimates and statistical significance.
+5) Considering the possibility of omitted variable bias, where important variables that are not included in the model may bias the estimated coefficients. Conduct sensitivity analyses or include additional control variables to mitigate this bias.
+6) Accounting for measurement error in the variables used in the regression model, as measurement errors can bias coefficient estimates and affect the validity of conclusions.
+7) Interpreting the coefficients and significance levels cautiously, considering both statistical significance and practical significance. Statistical significance alone does not guarantee substantive importance, and small effect sizes may not be practically meaningful.
+
+
+
+
+B) I’m up to my absolute [credit card] limit!
+
+a) Provide the interpretation for the gender, education, and marriage dummy/categorical variables. Do these values all make sense?
+
+For gender (factor(SEX)):
+The variable SEX is coded as 1 for males and 2 for females.
+In the table, the coefficient for factor(SEX)2 is 19,486.470 with a standard error of 1,675.279. This coefficient represents the difference in credit card limits between females and males (the reference category).
+A positive coefficient in this case indicates that, on average, females have higher credit card limits compared to males, while holding all other variables constant.
+Moreover, the significance level of this coefficient is marked as p<0.01, indicating that the difference in credit card limits between genders is statistically significant.
+
+For education (factor(EDUCATION)):
+The variable EDUCATION is encoded as 1 for graduate school, 2 for university, 3 for high school, 4 for other and 5 and 6 for unknown.
+
+Coefficients are provided for different levels of education compared to a reference level.
+For example, the coefficient for factor(EDUCATION)1 is -12,585.100 with a standard error of 29,882.500. This indicates the difference in credit card limits between individuals with graduate school education and the reference category. Similarly, the coefficients for factor(EDUCATION)2, factor(EDUCATION)3, factor(EDUCATION)4 and factor(EDUCATION)5 represent the difference in credit card limits between individuals with each level of education and the reference category.
+The negative coefficients suggest that, on average, individuals with lower levels of education have lower credit card limits compared to those with the reference level of education.
+However, it's worth noting that the coefficients for factor(EDUCATION)1 (graduate school) and factor(EDUCATION)4 (other) are not statistically significant at the conventional levels (p<0.05 or p<0.01).
+
+
+For marriage(factor(MARRIAGE)):
+The variable MARRIAGE is encoded as 0 for unknown, 1 for married, 2 for single and 3 for other.
+
+Coefficients are provided for different marital status categories compared to a reference category.
+For example, the coefficient for factor(MARRIAGE)1 is -1,037.127 with a standard error of 15,276.750. This indicates the difference in credit card limits between individuals who are married and the reference category.Similarly, the coefficients for factor(MARRIAGE)2 and factor(MARRIAGE)3 indicate the difference in credit card limits between individuals with each marital status category and the reference category.
+The negative coefficients suggest that, on average, individuals with the corresponding marital status have lower credit card limits compared to reference. However, it's worth noting that the coefficients for factor(MARRIAGE)1 (married) and factor(MARRIAGE)3 (other) are statistically significant at the conventional levels, while the coefficient for factor(MARRIAGE)2 (single) is not statistically significant.
+
+Generally, higher levels of education might be associated with higher incomes or financial stability, which could lead to higher credit card limits. Therefore, positive coefficients for higher education levels would make sense.
+However, the negative coefficient for some education levels (e.g., graduate school) might seem counterintuitive and require further investigation. It's essential to consider potential factors such as sample composition, differences in financial behavior, or data quality issues that could influence these results.
+The coefficients for different marital status categories compared to the reference category should align with expectations based on financial considerations associated with marriage.For example, married individuals might be perceived as more financially stable or responsible, leading to higher credit card limits. Positive coefficients for married status categories would support this expectation.
+However, negative coefficients might be unexpected and could indicate potential biases or factors not captured in the model.
+
+
+
+b) Based on the size of the standard error relative to the size of the coefficients, which variables appear to be the “most” significant? (if you had to place a bet on predicting with just two variables, what would they be and why?)
+
+To assess the relative significance of variables based on the size of the standard error relative to the size of the coefficients, we typically look for smaller standard errors relative to the magnitude of the coefficients. A smaller standard error indicates greater precision in estimating the coefficient, making it more likely that the observed relationship is not due to random variation.
+In the provided regression results, if we observe smaller standard errors relative to the magnitude of the coefficients, it suggests that those variables are more statistically significant. However, it's important to consider both the magnitude of the coefficient and the standard error simultaneously to determine significance.
+Based on these criteria, age, mean_bill and mean_pay seems to be a good starting point.
+
+For Age(AGE):
+The coefficient for age (1,995.319) is relatively large. The standard error (81.567) is comparatively small relative to the magnitude of the coefficient.
+This indicates that age is likely a statistically significant predictor of credit card limits.
+
+For Mean_Bill(MEAN_BILL):
+The coefficient for mean bill (0.439) is smaller in magnitude compared to age. Also, the standard error (0.017) is extremely small relative to the coefficient.
+This suggests that mean bill is highly statistically significant in predicting credit card limits.
+
+For Mean_Pay(MEAN_PAY):
+The coefficient for mean pay (3.925) is larger than that of mean bill. The standard error (0.117) is relatively small compared to the coefficient.
+This indicates that mean pay is statistically significant in predicting credit card limits, although with slightly less precision compared to mean bill.
+
+If we had predict with just two variables based on their significance, I would choose:
+Mean bill (MEAN_BILL): Its highly significant coefficient combined with an extremely small standard error suggests that it's a robust predictor of credit card limits.
+Mean pay (MEAN_PAY): Although its coefficient is slightly larger, its standard error is still relatively small, indicating its statistical significance in predicting credit card limits.
+These two variables offer a balance between strong statistical significance and predictive power, making them potentially valuable predictors in a simplified model.
+
+
+
+c) Provide the interpretation of the two sets of interaction variables.
+
+The regression model includes two sets of interaction variables: factor(SEX)2:MEAN_BILL and factor(SEX)2:MEAN_PAY.
+
+For Gender and Mean Bill (factor(SEX)2:MEAN_BILL)
+The coefficient for this interaction term is -0.032 with a standard error of 0.022.
+Since SEX is coded as 2 for females (the reference category) and 1 for males, this interaction term captures how the relationship between gender and credit card limits varies depending on the average bill statement.
+A negative coefficient indicates that, on average, the effect of mean bill on credit card limits is lower for females compared to males, while holding all other variables constant.
+In other words, for males, a higher average bill statement tends to be associated with a smaller decrease (or possibly an increase) in credit card limits compared to females, after accounting for other factors in the model.
+The significance level of this coefficient is marked as p<0.01, indicating that the interaction effect between gender and mean bill is statistically significant.
+
+For Gender and Mean Payment (factor(SEX)2:MEAN_PAY):
+The coefficient for this interaction term is -1.077 with a standard error of 0.143.
+This captures how the relationship between gender and credit card limits varies depending on the average payment amount.
+A negative coefficient suggests that, on average, the effect of mean payment on credit card limits is lower for females compared to males, while holding all other variables constant.
+Specifically, for males, a higher average payment tends to be associated with a smaller decrease (or possibly an increase) in credit card limits compared to females, after accounting for other factors in the model.
+The significance level of this coefficient is marked as p<0.01, indicating that the interaction effect between gender and mean payment is statistically significant.
+
+The negative coefficients suggest that the impact of mean bill and mean payment on credit card limits differs between males and females, with males experiencing a different effect compared to females.
+
+
+
+d) Any other observations? If you had the full dataset, what other things might you look at or consider?
+
+If provided with the full dataset, we can consider other additional analyses and explore further such as:
+1) Understanding how the independent variables correlate with each other and identifying if there are any potential multicollinearity issues as multicollinearity can distort coefficient estimates and affect the interpretation of results.
+2) Checking the assumptions of linear regression and evaluating the model's ability to explain the variability in the dependent variable (credit card limits). In other words, assessing the overall goodness-of-fit of the regression model.
+3) Identifying outliers and influential data points that may disproportionately influence the regression results. 
+4) Considering including adding some more relevant variables that may impact credit card limits such as income level, employment status or credit history.
+5) Investigating the potential interaction effects between different independent variables as they can provide valuable insights into complex relationships.
+6) Using cross-validation or comparing alternative models to determine which model provides the best predictive performance.
+7) Conducting sensitivity analyses to test the robustness of the regression results such as assessing how changes in model specifications, variable transformations, or sample subsets affect the estimated coefficients and overall model performance.
+
+
+
+
+## Question 3
+Revisiting Doris
+
+a) Conduct a linear regression model regressing miles on gasoline and provide the results of the regression table, do not omit data. Please interpret the results provided by the regression table.
+```{r}
+
+# Loading the dataset
+doris_data <- read.csv("doris_clean.csv")
+head(doris_data)
+
+# Checking the structure of the dataset
+str(doris_data)
+
+# Performing linear regression
+model <- lm(Miles ~ Gallons, data = doris_data)
+
+# Viewing summary of the regression model
+summary(model)
+
+```
+Results and their interpretation:
+
+i) Residuals:
+Residuals represent the differences between the observed values of the dependent variable (Miles) and the values predicted by the regression model. The summary provides statistics about the distribution of residuals, including the minimum, quartiles, and maximum values. The minimum residual is -225.21 miles and the maximum residual is 111.40 miles, indicating that the model underestimated the number of miles driven by 225.21 miles for at least one observation  and overestimated the number of miles driven by 111.40 miles for at least one observation. The presence of large residuals, both positive and negative, suggests that the model may not be ideal. Ideally, we would like the residuals to be randomly distributed around zero with no systematic patterns or large deviations. Therefore, further investigation may be needed to improve the model's fit and accuracy. 
+
+ii) Coefficients:
+The estimate column shows the estimated coefficients for the intercept and the independent variable (Gallons).
+For the intercept: The estimated intercept (162.796) represents the expected value of the dependent variable (Miles) when the independent variable (Gallons) is zero. In this case, it suggests that the expected number of miles driven when no gasoline is used is approximately 162.796 miles.
+For the independent variable (Gallons): The estimated coefficient (6.434) represents the expected change in the dependent variable (Miles) for a one-unit increase in the independent variable (Gallons). In this case, it suggests that, on average, for each additional gallon of gasoline used, the number of miles driven increases by approximately 6.434 miles.
+
+The Std. Error column shows the standard errors associated with the estimated coefficients. In this case, the value suggests that the estimate of the intercept as well as coefficient is somewhat uncertain.
+
+The t value column provides the t-values, which are calculated by dividing the estimated coefficients by their standard errors. These values indicate the number of standard deviations the estimated coefficients are from zero.The estimated intercept is 3.776 standard errors away from zero and the estimated coefficient is 1.348 standard errors away from zero.
+
+The Pr(>|t|) column shows the p-values associated with each coefficient. These p-values indicate the significance of the estimated coefficients. In this case, the p-value for the coefficient of Gallons is 0.179418, which is greater than the typical significance level of 0.05. Therefore, we fail to reject the null hypothesis that the coefficient is equal to zero, suggesting that there may not be a significant relationship between the number of gallons of gasoline used and the number of miles driven.
+
+iii) Residual standard error:
+This provides an estimate of the standard deviation of the residuals. In this case, it is 70.28 miles, indicating the average difference between observed and predicted values.
+
+iv) Multiple R-squared and Adjusted R-square
+These values provide measures of how well the independent variable(s) explain the variation in the dependent variable. In this case, the adjusted R-squared value is very low (0.004843), indicating that the model explains only a small proportion of the variance in the dependent variable.
+
+v) F-statistic and associated p-value
+These test the overall significance of the regression model. In this case, the p-value is 0.1794, suggesting that the model as a whole may not be statistically significant.
+
+
+
+b) What are five possible sources of error in the regression?
+
+The five sources of errors in the regression analysis could be:
+1) Inaccuracies or imprecisions in the measurement of variables can introduce error into the regression model. This can include errors in data collection, recording, or reporting.
+2) Some important variables may not have been included in the regression model leading to making biased coefficient estimates. If relevant variables are omitted, their effects may be falsely attributed to other variables in the model.
+3) Multicollinearity occurs when independent variables in the regression model are highly correlated with each other. This can result in inflated standard errors, making it difficult to determine the unique contribution of each variable to the dependent variable.
+4) Heteroscedasticity refers to the situation where the variance of the residuals (errors) is not constant across all levels of the independent variables. This violates one of the assumptions of linear regression and can lead to inefficient coefficient estimates and biased standard errors.
+5) Incorrect functional form or specification of the regression model can introduce error into the analysis. Using the wrong model can lead to biased coefficient estimates and inaccurate predictions.
+
+
+c) Provide a graph of the residuals, how is the model fit? For data points where the odometer is faulty, color the points red
+
+```{r}
+
+# Predicting the values
+doris_data$predicted_miles <- predict(model)
+
+# Adding residuals to the dataset
+doris_data$residuals <- residuals(model)
+
+# Creating a scatterplot of residuals
+ggplot(data = doris_data, aes(x = predicted_miles, y = residuals)) +
+  geom_point(aes(color = factor(OdoFault)), size = 3) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+  labs(x = "Predicted Miles", y = "Residuals", title = "Residuals Plot") +
+  scale_color_manual(values = c("green", "red")) +  # Set colors for OdoFault variable
+  theme_minimal()
+```
+
+d) Plot both the leverage and Cook’s distance for the model, color points where the odometer is faulty red. Provide a qualitative interpretation of these plots.
+```{r}
+# Obtaining leverage and Cook's distance
+leverage <- hatvalues(model)
+cooks_distance <- cooks.distance(model)
+
+# Adding these metrics to data frame
+doris_data$Leverage <- leverage
+doris_data$Cooks_Distance <- cooks_distance
+
+# Using OdoFault column to indicate if the odometer reading is faulty or not
+doris_data$Faulty_Odometer <- ifelse(doris_data$OdoFault == 1, "Faulty", "Working")
+
+# Creating plots for leverage and Cook's distance
+leverage_plot <- ggplot(doris_data, aes(x = seq_along(Leverage), y = Leverage, color = Faulty_Odometer)) +
+  geom_point() +
+  geom_hline(yintercept = 2 * mean(leverage), linetype = "dashed", color = "gray") +
+  labs(title = "Leverage Plot", x = "Index", y = "Leverage") +
+  scale_color_manual(values = c("Faulty" = "red", "Working" = "black"), name = "Odometer Status") +
+  theme_minimal()
+
+cook_plot <- ggplot(doris_data, aes(x = seq_along(Cooks_Distance), y = Cooks_Distance, color = Faulty_Odometer)) +
+  geom_point() +
+  geom_hline(yintercept = 4 / nrow(doris_data), linetype = "dashed", color = "gray") +
+  labs(title = "Cook's Distance Plot", x = "Index", y = "Cook's Distance") +
+  scale_color_manual(values = c("Faulty" = "red", "Working" = "black"), name = "Odometer Status") +
+  theme_minimal()
+
+# Displaying the plots
+print(leverage_plot)
+print(cook_plot)
+
+```
+
+e) Re-run the regression model omitting data where OdoFault==1. Please interpret the results provided by the regression table.
+```{r}
+
+# Filtering out observations where OdoFault == 1
+doris_filtered <- doris_data %>% filter(OdoFault != 1)
+
+# Performing linear regression
+model_filtered <- lm(Miles ~ Gallons, data = doris_filtered)
+
+# Printing summary of regression results
+summary(model_filtered)
+```
+Interpretation:
+
+i) Residuals:
+The minimum residual is -99.955, the 25th percentile (1Q) is -17.935, the median is 0.964, the 75th percentile (3Q) is 21.628, and the maximum residual is 68.814.
+These values describe the spread and distribution of the residuals around the regression line. The residuals are centered around 0, indicating that, on average, the model's predictions are close to the observed values.
+
+ii) Coefficients:
+The coefficient for Gallons is 21.099, with a standard error of 2.423 and a t-value of 8.708. The p-value associated with Gallons is very low (7.16e-15), indicating that the coefficient is statistically significant.
+The intercept term ((Intercept)) is 57.206, with a standard error of 21.597 and a t-value of 2.649. The p-value for the intercept is 0.00899, which is less than 0.05, indicating that the intercept is also statistically significant.
+These coefficients represent the estimated change in Miles for a one-unit increase in Gallons. Since the p-value for Gallons is very low, we can conclude that there is a statistically significant positive relationship between Gallons and Miles.
+
+iii) Residual standard error:
+The residual standard error is 31.93, which is an estimate of the standard deviation of the residuals. It represents the average amount that the observed values deviate from the predicted values by the model.
+
+iv) Multiple R-squared and Adjusted R-square
+The R-squared value is 0.3481, indicating that approximately 34.81% of the variance in Miles is explained by the predictor variable Gallons. The adjusted R-squared value (0.3435) is similar, suggesting that the model's explanatory power is robust even after adjusting for the number of predictors in the model.
+
+v) F-statistic and associated p-value
+The F-statistic is 75.83 with a very low p-value (7.161e-15), indicating that the overall regression model is statistically significant. This means that there is strong evidence to reject the null hypothesis that all regression coefficients are zero.
+
+Excluding faulty odometer readings has led to a regression model with a stronger explanatory power, as evidenced by the significantly higher adjusted R-squared value and the more statistically significant coefficient for the predictor variable Gallons. This suggests that the relationship between the number of gallons of gasoline and the number of miles driven is more accurately captured by the current model.
+
+
+f) Predict the miles travelled for each of the points where the odometer was not working using the output of the new linear regression model. Plot the predicted miles versus the “faulty” miles.
+```{r}
+# Extracting subset of data where OdoFault == 1
+faulty_data <- doris_data %>% filter(OdoFault == 1)
+
+# Predicting miles using the regression model
+faulty_data$Predicted_Miles <- predict(model_filtered, newdata = faulty_data)
+
+# Creating scatter plot
+plot(faulty_data$Predicted_Miles, faulty_data$Miles, 
+     xlab = "Predicted Miles", ylab = "Faulty Miles",
+     main = "Predicted vs Faulty Miles for Faulty Odometer Readings",
+     col = "red", pch = 16)
+
+# Adding a line of equality for reference
+abline(0, 1, col = "blue", lwd = 2)
+
+# Adding legend
+legend("bottomright", legend = c("Predicted vs Faulty", "Line of Equality"), 
+       col = c("red", "blue"), pch = c(16, NA), lwd = c(NA, 2), 
+       cex = 0.8, bg = "white", box.lwd = 1)
+
+```
+
+g) Using the new linear regression model, what is the MSE for the “correct” mileage points? What is the MSE for the “incorrect” mileage points?
+
+```{r}
+# Extracting subset of data for correct and incorrect mileage points
+correct_data <- doris_data %>% filter(OdoFault == 0)
+incorrect_data <- doris_data %>% filter(OdoFault == 1)
+
+# Predicting miles for correct and incorrect mileage points
+correct_data$Predicted_Miles <- predict(model_filtered, newdata = correct_data)
+incorrect_data$Predicted_Miles <- predict(model_filtered, newdata = incorrect_data)
+
+# Calculating squared differences for correct and incorrect mileage points
+correct_squared_diff <- (correct_data$Miles - correct_data$Predicted_Miles)^2
+incorrect_squared_diff <- (incorrect_data$Miles - incorrect_data$Predicted_Miles)^2
+
+# Calculating MSE for correct and incorrect mileage points
+mse_correct <- mean(correct_squared_diff)
+mse_incorrect <- mean(incorrect_squared_diff)
+
+# Printing MSE for correct and incorrect mileage points
+cat("MSE for correct mileage points:", mse_correct, "\n")
+cat("MSE for incorrect mileage points:", mse_incorrect, "\n")
+```
+
+
+## Question 4
+Revisiting Claire
+```{r}
+
+# Loading the dataset
+claire_data <- read.csv("claire_clean.csv")
+head(claire_data)
+
+# Checking the structure of the dataset
+str(claire_data)
+```
+
+a) In order to determine the breakdown between gasoline and electricity, let us make the assumption that if there are any fueling events that occur within 3 days of each other, that all of those miles are driven on gasoline. Run a regression of miles travelled on gasoline consumed on a subset of data that represents these events and provide the results of the regression table. Please interpret the results provided by the regression table.
+
+```{r}
+# Converting the date column to Date format
+claire_data$date <- as.Date(claire_data$date, format = "%m/%d/%Y")
+
+# Identifying fueling events that occur within 3 days of each other
+claire_data <- claire_data %>% mutate(time_diff = c(0, diff(date)) ,gas_event = ifelse(time_diff <= 3, 1, 0))
+
+# Calculating the difference in odometer readings to get miles traveled
+claire_data$miles_traveled <- c(0, diff(claire_data$odometer))
+
+# Creating a subset of data representing fueling events within 3 days of each other
+subset_data <- claire_data %>% filter(gas_event == 1)  
+
+# Assuming that we do not have prior data for first row so we don't know if it is fueling event. Thus, discarding it
+subset_data <- subset_data[-1, ]
+
+# Running a regression of miles traveled on gasoline consumed
+model_claire <- lm(miles_traveled ~ gas.quantity, data = subset_data)
+
+# Printing the regression summary
+summary(model_claire)
+
+```
+Interpretation:
+
+i) Residuals:
+The minimum and maximum residuals are -27.698 and 60.760 , respectively, indicating the range of deviations from the predicted values.
+
+ii) Coefficients:
+Intercept: TThe intercept of 26.64 indicates the expected miles traveled when the quantity of gasoline consumed is zero. However, this value is not statistically significant (p = 0.70303), suggesting that it may not be a reliable estimate.
+Gas.Quantity: The coefficient of 36.85 indicates that for every unit increase in gas.quantity (gallons), there is an expected increase of approximately 36.85 miles traveled. This coefficient is statistically significant with a p-value of 0.00547, suggesting a reliable relationship between gasoline consumption and miles traveled.
+
+iii) Residual standard error:
+This value of 28.33 indicates the standard deviation of the residuals, suggesting that the model's predictions typically deviate from the actual values by around 28.33 miles.
+
+iv) Multiple R-squared and Adjusted R-square
+The value of 0.3561 suggests that approximately 35.61% of the variability in miles traveled can be explained by the quantity of gasoline consumed.
+The adjusted R-squared value of 0.3204 adjusts the multiple R-squared for the number of predictors in the model, providing a more accurate measure of the model's goodness of fit.
+
+v) F-statistic and associated p-value
+The F-statistic is 9.956 with a corresponding p-value of 0.005475. The model is statistically significant, indicating that it provides a better fit to the data than a model with no predictors.
+
+
+
+b) Assuming the value calculated in the previous part is an accurate representation of the fuel efficiency of Claire, calculate how many miles have been driven on gasoline in total, how many miles have been driven on electricity in total, and the PHEV’s utility factor (electric miles divided by total miles).
+
+```{r}
+
+# Calculating total miles driven on gasoline
+total_gas_miles <- sum(subset_data$miles_traveled)
+
+# Calculating total miles
+total_miles <- sum(claire_data$miles_traveled)
+
+# Calculating total miles driven on electricity
+total_electric_miles <- total_miles - total_gas_miles
+
+# PHEV's utility factor (electric miles divided by total miles)
+utility_factor <- total_electric_miles / total_miles
+
+# Displaying results
+print(paste("Total miles driven on gasoline:", total_gas_miles))
+print(paste("Total miles driven on electricity:", total_electric_miles))
+print(paste("PHEV's utility factor:", utility_factor))
+```
+
+c) The assumption about certain events being fueled entirely by gasoline is fairly robust as they typically occur on long-distance trips (e.g. going to Tahoe, National Parks, or to Southern California). Given this information, are the results reasonable for efficiency overall? What might be different about vehicle efficiency in short-distance versus long-distance travel
+
+These results suggest that the majority of miles (approximately 76.12%) have been driven on electricity, which aligns with the expectation for a plug-in hybrid electric vehicle (PHEV). PHEVs are designed to maximize electric driving range, particularly for shorter trips and urban commuting, where electric power is more efficient and cost-effective.
+
+Short-Distance Travel: Short trips typically involve frequent stops and starts, which may not allow the vehicle's battery to fully utilize its electric range. In these scenarios, the vehicle may rely more on its internal combustion engine (gasoline) for propulsion, leading to lower electric miles and a lower utility factor.
+Long-Distance Travel: Long-distance trips often involve sustained highway driving, where the vehicle can operate more efficiently in its electric mode, especially at constant speeds. However, for extended journeys beyond the electric range, the vehicle may switch to gasoline power. If multiple fueling events occur within a short time frame during such trips, as assumed in the analysis, it's reasonable to attribute those miles to gasoline.
+
+Overall, while short-distance travel may yield lower utility factors due to increased reliance on gasoline, long-distance travel, particularly with frequent fueling events close in time, can result in higher gasoline usage but still maintain a significant proportion of electric miles. Therefore, the results seem reasonable given the nature of PHEV operation and driving patterns.
+
+
+
+
+## Question 5
+Revisiting MacKayla
+
+a) Regress energy used on distance, brake score, brake regen, and driving score; provide the results of the regression table. What is the energy efficiency of the vehicle reported by the regression (in units of miles per kWh)?
+
+```{r}
+
+# Loading the dataset
+mackayla_data <- read.csv("mackayla_trips_clean.csv")
+head(mackayla_data)
+
+# Checking the structure of the dataset
+str(mackayla_data)
+
+# Converting all the required value to numeric
+mackayla_data$Brake.Score <- as.numeric(gsub("%", "", mackayla_data$Brake.Score))
+mackayla_data$Driving.Score <- as.numeric(gsub("%", "", mackayla_data$Driving.Score))
+
+```
+
+```{r}
+# Running multiple linear regression
+model_mackayla <- lm(Energy.Used ~ Distance + Brake.Score + Brake.Regen + Driving.Score, data = mackayla_data)
+
+# Displaying the summary of the regression model
+summary(model_mackayla)
+```
+```{r}
+if(summary(model_mackayla)$coefficients['Distance', 'Pr(>|t|)'] < 0.05) {
+  energy_efficiency_miles_per_kWh <- 1 / coef(model_mackayla)['Distance']
+  cat("The energy efficiency of the vehicle is approximately", energy_efficiency_miles_per_kWh, "miles per kWh\n")
+} else {
+  cat("Distance is not a significant predictor in the model.")
+}
+```
+
+b) Because errors are caused by GPS location not resetting, this results in any errors in distance always being overestimated. This allows us to identify and drop outliers in a unique way: dropping data points from highest to lowest energy efficiency. Run the same regression model above but looping
+through a “partial” dataset where you drop data points one at a time. For each set of model results,
+generate a prediction of the total distance driven in the full dataset (Hint: you should be creating a table with two columns: 1 - number of dropped points, 2 - total predicted distance). Note that this is a non-traditional prediction since you are predicting an explanatory variable, not a response variable.
+c) At the time the data was collected, the odometer on MacKayla was 6,450 miles. Assuming this is the
+correct mileage for the vehicle, create a new column in the table above measuring the difference in
+predicted total miles and the actual total miles (6,450).
+
+```{r}
+# Assuming 'data' is your DataFrame containing the vehicle's usage records
+data <- read.csv("mackayla_trips_clean.csv", stringsAsFactors = FALSE)
+
+# Convert necessary columns from percentages to decimals if needed
+data$Brake.Score <- as.numeric(sub("%", "", data$Brake.Score)) / 100
+data$Driving.Score <- as.numeric(sub("%", "", data$Driving.Score)) / 100
+
+# Order data by Energy Efficiency in descending order for dropping
+data <- data[order(-data$Energy.Efficiency),]
+
+# Prepare a data frame to store the results
+results <- data.frame(DroppedPoints = integer(), TotalPredictedDistance = numeric(), DifferenceFromActual = numeric())
+
+# Actual total mileage from odometer
+actual_total_miles <- 6450
+
+# Loop through the data, removing the most efficient point iteratively
+for (i in 1:(nrow(data) - 1)) {
+    partial_data <- data[-(1:i), ]
+    if (nrow(partial_data) < 20) {  # Ensure enough data points remain
+        print(paste("Not enough data points remaining after dropping", i, "points."))
+        break
+    }
+
+    # Fit the regression model to the partial data
+    model <- lm(Energy.Used ~ Distance + Brake.Score + Brake.Regen + Driving.Score, data = partial_data)
+
+    # Ensure model fitting was successful
+    if (length(coef(model)) > 0 && !any(is.na(coef(model)))) {
+  
+        # Calculate estimated Distances
+        if ("Distance" %in% names(coef(model)) && coef(model)["Distance"] != 0) {
+            estimated_distances <- (data$Energy.Used - coef(model)["(Intercept)"] -
+                                    coef(model)["Brake.Score"] * data$Brake.Score -
+                                    coef(model)["Brake.Regen"] * data$Brake.Regen -
+                                    coef(model)["Driving.Score"] * data$Driving.Score) / coef(model)["Distance"]
+            total_predicted_distance <- sum(estimated_distances, na.rm = TRUE)
+            difference_from_actual <- total_predicted_distance - actual_total_miles
+            results <- rbind(results, data.frame(DroppedPoints = i, TotalPredictedDistance = total_predicted_distance, DifferenceFromActual = difference_from_actual))
+        } else {
+            print(paste("Coefficient for Distance not usable or model did not converge at iteration", i))
+        }
+    } else {
+        print(paste("Model fitting failed at iteration", i))
+    }
+}
+
+# Print the results
+head(results)
+```
+
+d) Provide a plot of the difference in predicted total distance and actual total distance (y-axis) versus the number of points dropped (x-axis). Only plot the first 800 points dropped. How many data points gets you closest to 0 for mileage difference?
+
+```{r}
+
+# Plot the difference in predicted total distance and actual total distance versus the number of points dropped
+ggplot(results[1:800, ], aes(x = DroppedPoints, y = DifferenceFromActual)) +
+  geom_point() +
+  labs(x = "Number of Points Dropped", y = "Difference in Total Distance") +
+  ggtitle("Difference in Predicted vs. Actual Total Distance") +
+  theme_minimal()
+
+# Find the row with the smallest absolute difference
+min_difference_row <- which.min(abs(results$DifferenceFromActual))
+
+# Extract the number of dropped points with the smallest absolute difference
+num_points_closest_to_zero <- results$DroppedPoints[min_difference_row]
+
+# Print the number of data points closest to 0 for mileage difference
+cat("The number of data points that we drop to get close to 0 is ", num_points_closest_to_zero)
+```
+
+
+
+e) Report the results from the regression model that gets you closest to 0 difference in total mileage. What is the energy efficiency of the vehicle reported by the regression (in units of miles per kWh)?
+
+```{r}
+# Retrieve the regression model with the smallest absolute difference in total mileage
+model_closest_to_zero <- lm(Energy.Used ~ Distance + Brake.Score + Brake.Regen + Driving.Score, data = data[-(1:num_points_closest_to_zero), ])
+
+# Display the summary of the regression model
+summary(model_closest_to_zero)
+
+# Calculate the energy efficiency of the vehicle reported by the regression
+# The energy efficiency is the coefficient of the 'Distance' variable
+energy_efficiency <- coef(model_closest_to_zero)["Distance"]
+
+# Print the energy efficiency in miles per kWh
+cat("The energy efficiency of the vehicle reported by the regression is", 1/energy_efficiency, "miles per kWh.")
+
+
+```
