@@ -1,0 +1,435 @@
+---
+title: "TTP 201 - Homework 3"
+author: "Shristi Suman"
+date: "May 12 2024"
+output:
+  pdf_document:
+    latex_engine: xelatex  # or lualatex
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+## Use this chunk to load packages or external R scripts
+#install.packages("ggplot2")
+#install.packages("ISLR")
+#install.packages("leaps")
+#install.packages("regclass")
+#install.packages("glmnet")
+#install.packages(("caret"))
+library(glmnet)
+library(leaps)             
+library(regclass)
+library(ISLR)
+library(MASS)
+library(caret)
+library(reshape2)
+```
+
+## Question 1
+
+Problem 1: Cross-validation
+
+Write a generic function in R that will perform a k-fold cross-validation on any linear model (hint: modify the one I wrote in the notes, make use of the formula function). Have the output of the formula provide the average mean-square test errors. In other words, fill out the following function:
+cross.validation <- function(k,y,x,inputData) {}
+Note that x in the above function should be able to handle multiple explanatory variables.
+
+```{r }
+
+# Function for cross validation with provided parameters x, y, k and inputData
+cross.validation <- function(k, y, x, inputData) {
+  
+  # Defining the formula for the linear model
+  formula <- as.formula(paste(y, "~", paste(x, collapse = "+")))
+  
+  # Initializing vector to store MSE for each fold
+  mse.all <- numeric(k)
+  
+  # Generating indices for k-fold cross-validation
+  indices <- sample(1:k, nrow(inputData), replace = TRUE)
+  
+  # Looping over each fold
+  for (i in 1:k) {
+    
+    # Creating subset data for training and testing
+    training.data <- inputData[indices != i, ]
+    testing.data <- inputData[indices == i, ]
+    
+    # Calibrating the model on training data
+    model <- lm(formula, data = training.data)
+    
+    # Predicting on testing data
+    predictions <- predict(model, newdata = testing.data)
+    
+    # Calculating mean square error for current fold
+    mse.fold <- mean((testing.data[[y]] - predictions)^2)
+    
+    # Storing MSE for current fold
+    mse.all[i] <- mse.fold
+  }
+  
+  # Calculating average MSE over all folds
+  avg_mse <- mean(mse.all)
+  
+  # Returning average MSE
+  return(avg_mse)
+}
+```
+
+In the provided function, the explanatory variables are passed as a vector x. This vector can contain one or more variable names. For example, if we have three explanatory variables Var1, Var2, and Var3, we can pass them as x = c("Var1", "Var2", "Var3").
+
+Inside the function, these variables are used to construct the formula for the linear model using the paste function. Specifically, paste(x, collapse = "+") concatenates the variable names in x with the + operator, creating the formula Var1 + Var2 + Var3. This formula is then used to fit the linear model.
+
+So, whether we have one explanatory variable or multiple explanatory variables, the function will handle them correctly.
+
+```{r}
+# Example usage
+set.seed(123)  # for reproducibility
+
+# Define the dataset
+input_data <- data.frame(
+  y = rnorm(100),  # Response variable
+  x1 = rnorm(100), # Explanatory variable 1
+  x2 = rnorm(100)  # Explanatory variable 2
+)
+
+# Run cross-validation with 5 folds
+avg_mse <- cross.validation(5, "y", c("x1", "x2"), input_data)
+print(avg_mse)
+
+```
+
+
+
+
+## Question 2
+
+Problem 2: Taking a step backwards
+```{r}
+
+#Loading the baseball dataset from the ISLR package as follows:
+library(ISLR)
+data(Hitters)
+
+# Checking the structure
+str(Hitters)
+
+# Viewing top 5 rows
+head(Hitters)
+
+```
+
+
+a) What is contained within the hitters dataset? Provide a brief description of the types of variables in the data (you don’t need to describe each variable individually, give a broad view of what the data tells you).
+
+The Hitters dataset contains information about professional baseball players. A broad overview of the types of variables in the dataset is as follows:
+i) Metrics related to performance of the player:
+The variables such as AtBat, Hits, HmRun, Runs, RBI, and Walks provide the statistics about the player's performance during a specific baseball season. These metrics include the number of times at bat, hits, home runs, runs scored, runs batted in, and walks in a specific baseball season.
+
+ii) Experience: 
+The variable Years represents the number of years the player has been playing professional baseball.
+
+iii) Metrics related to career:
+The variables such as CAtBat, CHits, CHmRun, CRuns, CRBI, and CWalks are depicting the cumulative statistics. It represents the player's career-long accumulation of at-bats, hits, home runs, runs scored, runs batted in, and walks.
+
+iv) Leagues and Divisions:
+The variable League has two values A and N indicating the league in which the player competed, American for A and National for N. Similarly, the variable Division has two values E and W indicating the division in which the player competed, East for E and West for W.
+
+v) Metrics related to defensive performance:
+The variables such as PutOuts, Assists, and Errors provide the information about the player's defensive performance during the baseball season.The number of putouts, assists, and errors have been shown in the dataset.
+
+vi) Information about Salary:
+The dataset includes the Salary variable which represents the player's salary. This variable also serves as the response variable for predictive modeling.
+
+vii) Player Attributes: 
+The variable NewLeague has two values A and N indicating whether the player moved to a new league during their career. 
+
+Overall, the dataset provides a comprehensive set of variables capturing various aspects of baseball player performance, career progression, defensive skills, league affiliation, and salary information.
+
+
+
+b) Produce a linear model, with salary being the response variable, based on what you know (or think you know!) about baseball. Use your intuition, your “gut” feeling, or just make-up a random model
+
+Based on my intution:
+Performance Metrics: We can hypothesize that performance metrics such as the number of hits (Hits), home runs (HmRun), runs batted in (RBI), and walks (Walks) might positively influence a player's salary. These are key offensive statistics that often correlate with a player's value to a team.
+
+Experience: Experience in terms of the number of years playing professional baseball (Years) might also be a factor. Generally, players with more experience tend to command higher salaries due to their seasoned skills and track record.
+
+Defensive Performance: Defensive metrics such as the number of put outs (PutOuts) and assists (Assists) might also have an impact on salary. Players who excel defensively are valuable assets to their teams and may be compensated accordingly.
+
+League and Division: The league and division in which a player competes might impact their salary. Players in more competitive leagues or divisions may receive higher salaries due to the perceived higher level of competition and greater exposure.
+```{r}
+
+# Defining the formula for the linear model
+formula <- Salary ~ Hits + HmRun + RBI + Walks + Years + PutOuts + Assists + League + Division
+
+# Fitting the linear model
+lm_model <- lm(formula, data = Hitters)
+
+# Summary of the model
+summary(lm_model)
+
+```
+
+
+
+c) Write a backward stepwise selection function that will produce k models from the k variables in the hitters dataset. The function should identify the “best” linear model to use for each of the following criteria: Akaike information criterion, Bayesian information criterion, and adjusted-R2.
+
+```{r}
+data("Hitters")
+Hitters <- na.omit(Hitters)  
+
+backward_stepwise <- function(data, response, criterion = c("AIC", "BIC", "adjR2")) {
+  criterion <- match.arg(criterion)
+  response_formula <- as.formula(paste(response, "~ ."))
+
+  full_model <- lm(response_formula, data = data)
+  best_model <- full_model
+  
+  if (criterion %in% c("AIC", "BIC")) {
+    direction <- "backward"
+    stepwise_model <- stepAIC(full_model, direction = direction, trace = FALSE,
+                              k = ifelse(criterion == "AIC", 2, log(nrow(data))))
+  } else {  # Adjusted R-squared
+    variables <- names(data)
+    best_adjR2 <- summary(full_model)$adj.r.squared
+    
+    repeat {
+      current_best_adjR2 <- best_adjR2
+      best_variable_to_remove <- NULL
+      
+      for (variable in setdiff(variables, response)) {
+        formula_held <- as.formula(paste(response, "~", paste(setdiff(variables, c(response, variable)), collapse = " + ")))
+        model_held <- lm(formula_held, data = data)
+        current_adjR2 <- summary(model_held)$adj.r.squared
+        
+        if (current_adjR2 > best_adjR2) {
+          best_adjR2 <- current_adjR2
+          best_model <- model_held
+          best_variable_to_remove <- variable
+        }
+      }
+      
+      if (!is.null(best_variable_to_remove)) {
+        variables <- setdiff(variables, best_variable_to_remove)
+      } else {
+        break
+      }
+    }
+    stepwise_model <- best_model
+  }
+  
+  return(stepwise_model)
+}
+```
+
+```{r}
+best_model_AIC <- backward_stepwise(Hitters, "Salary", "AIC")
+best_model_BIC <- backward_stepwise(Hitters, "Salary", "BIC")
+best_model_adj_r2 <- backward_stepwise(Hitters, "Salary", "adjR2")
+
+print("Best model according to AIC ")
+summary(best_model_AIC)
+print("Best model according to BIC")
+summary(best_model_BIC)
+print("Best model according to adj R2")
+summary(best_model_adj_r2)
+```
+
+
+
+d) How do each of the models compare to each other in terms of coefficient values? Are they relatively similar, or very different? How do these models compare to the linear model you came up with on your own?
+
+The models based on different criteria, namely Akaike information criterion (AIC), Bayesian information criterion (BIC), and adjusted R-squared, offer diverse perspectives on the relationship between predictors and the response variable, salary, in the hitters dataset. While some variables are consistently included across models, such as "AtBat," "Hits," "Walks," "CRuns," "CRBI," "CWalks," "DivisionW," and "PutOuts," there are notable differences in the variables selected by each criterion.
+
+Both AIC and BIC models exhibit similarities in terms of the included variables, suggesting their importance in predicting salary. The coefficients associated with these variables shed light on their respective impacts on salary, providing valuable insights for understanding the relationship between player statistics and compensation. For instance, positive coefficients for "Hits" imply that an increase in hits is associated with higher salaries, while negative coefficients for "AtBat" and "CWalks" suggest a negative relationship with salary.
+
+However, discrepancies arise when comparing the variables included in each model. For instance, the AIC model incorporates additional variables like "Assists" and "CAtBat" that are not present in the BIC model. This indicates that the significance of these variables might be more pronounced when considering the AIC criterion. Moreover, although the adjusted R-squared model shares many similarities with the AIC model in terms of included variables, subtle differences in coefficient values may exist due to the distinct model selection criteria employed.
+
+Despite variations in predictor composition, the general directionality of coefficient values remains consistent across models. However, slight discrepancies in magnitude may arise, highlighting the nuanced differences in the interpretation of each criterion's model selection process.
+
+In summary, while each model provides valuable insights into the factors influencing player salary, it's crucial to consider the context and limitations of each criterion when interpreting the results. By understanding these nuances, researchers can derive more comprehensive conclusions regarding the relationship between player statistics and compensation in baseball.
+
+
+The model I came up with includes variables such as "Hits," "Years," "PutOuts," "Walks," "DivisionW," and "LeagueN." Some of these variables, such as "Hits" and "Walks," align with the variables included in the models based on AIC, BIC, and adjusted R-squared. However, there are differences, as my model does not include variables like "CRuns," "CRBI," "CAtBat," and "Assists," which were present in some of the other models. The coefficients for variables like "Hits," "Years," "Walks," and "PutOuts" have positive coefficients, suggesting a positive relationship with salary. This aligns with the interpretations from the other models. However, the magnitude of coefficients may differ between models, reflecting variations in the strength of the relationships.
+
+Finally for the model performance, my model has an adjusted R-squared value of 0.4094, indicating that it explains approximately 40.94% of the variance in the response variable, salary. This is lower than the adjusted R-squared values obtained from the AIC and adjusted R-squared models, suggesting that those models may provide a slightly better fit to the data although not very significant.A simpler interpretation is offered compared to more complex models based on information criteria. 
+
+
+
+e) Employing the cross-validation function from Problem 1, provide an estimate of the cross-validated test errors for each of the models.
+
+```{r}
+Y <- "Salary"
+k <-10
+X_aic <- c("AtBat", "Hits", "Walks", "CAtBat", "CRuns", "CRBI", "CWalks", "Division", "PutOuts", "Assists")
+X_bic <- c("AtBat", "Hits", "Walks", "CRuns", "CRBI", "CWalks", "Division", "PutOuts")
+X_adj_r2 <- c("AtBat", "Hits", "Walks", "CAtBat", "CRuns", "CRBI", "CWalks", "League","Division", "PutOuts", "Assists")
+```
+
+```{r}
+set.seed(123)
+cv_error_AIC <- cross.validation(k, Y, X_aic, Hitters)
+print("Cross Validation for AIC:")
+cv_error_AIC
+```
+
+```{r}
+set.seed(123)
+cv_error_BIC <- cross.validation(k, Y, X_bic, Hitters)
+set.seed(123)
+print("Cross Validation for BIC:")
+cv_error_BIC
+```
+
+```{r}
+set.seed(123)
+cv_error_adj_r2 <- cross.validation(k, Y, X_adj_r2, Hitters)
+print("Cross Validation for Adjusted R2:")
+cv_error_adj_r2
+```
+
+
+## Question 3
+
+3) The ridge, the lasso, and the elastic net
+
+a) Perform both a ridge, lasso, and elastic net regression with cross-validation on the hitters dataset (feel free to use the glmnet function, you do not need to employ your own cross-validation routine). 
+What is the ideal value of λ (the tuning parameter) for each of the regressions and what is the ideal value of α for the elastic net?
+```{r}
+
+# Loading the Hitters dataset
+data(Hitters)
+
+# Removing rows with missing values
+Hitters <- na.omit(Hitters)
+
+x <- model.matrix(Salary~., data=Hitters)[,-1]
+y <- Hitters$Salary
+```
+
+```{r}
+# Performing ridge regression with cross-validation
+set.seed(123)
+ridge_cv <- cv.glmnet(x, y, alpha = 0)  # alpha = 0 for ridge regression
+# Extract the "best" lambda values for ridge
+optimal_lambda_ridge <- ridge_cv$lambda.min
+# Ideal value of lamda for Ridge
+cat("Ideal lambda for ridge regression:", optimal_lambda_ridge, "\n")
+```
+
+```{r}
+# Performing lasso regression with cross-validation
+set.seed(123)
+lasso_cv <- cv.glmnet(x, y, alpha = 1)  # alpha = 1 for lasso regression
+# Extract the "best" lambda values for lasso
+optimal_lambda_lasso <- lasso_cv$lambda.min
+# Ideal value of lamda for Lasso
+cat("Ideal lambda for lasso regression:", optimal_lambda_lasso, "\n")
+```
+
+```{r}
+# Setting up the training procedure
+set.seed(123)
+train_control <- trainControl(method = 'repeatedcv', number = 5, repeats = 5, search = 'random', verboseIter = FALSE)
+
+# Performing elastic net regression with cross-validation
+elastic_net_best <- train(Salary ~ .,
+                          data = Hitters,
+                          method = 'glmnet',
+                          preProcess = c('center', 'scale'),
+                          tuneLength = 25,
+                          trControl = train_control)
+
+# Getting the optimal alpha and lambda values
+optimal_alpha <- elastic_net_best$bestTune$alpha
+optimal_lambda <- elastic_net_best$bestTune$lambda
+# Ideal value of lambda and alpha for elastic net
+cat("Ideal lambda for elastic net regression:", optimal_lambda, "\n")
+cat("Ideal value of alpha for elastic net:", optimal_alpha)
+```
+
+
+
+b) Provide a plot of the coefficient values over different values of λ (the tuning parameter) for both the ridge, lasso, and elastic net (for this, set the alpha to the ideal value and use cv.glmnet to vary lambda) regressions. How do they differ? Which do you prefer?
+
+```{r}
+# Plot for Ridge regression
+#plot(ridge_cv)
+plot(ridge_cv$glmnet.fit, xvar = 'lambda', label = TRUE)
+```
+
+```{r}
+# Plot for Lasso regression
+#plot(lasso_cv)
+plot(lasso_cv$glmnet.fit, xvar = 'lambda', label = TRUE)
+```
+
+```{r} 
+# Plot for Elastic net regression
+elastic_net_model <- cv.glmnet(x, y, alpha = optimal_alpha)
+# Plot coefficient values over different values of λ
+plot(elastic_net_model$glmnet.fit, xvar = "lambda", label = TRUE)
+```
+
+Ridge Regression:
+The coefficients are gradually shrinking towards zero as the regularization parameter λ is increasing, but none of them are actually reaching zero. This method effectively handles multicollinearity by distributing coefficient values among correlated predictors.It is particularly useful here as many statistical categories in baseball, like runs batted in (RBI) and home runs, could be correlated.
+
+Lasso Regression:
+Some coefficients are hitting zero at certain values of λ, indicating that Lasso performs automatic feature selection by eliminating less influential predictors entirely from the model. This leads to a simpler and more interpretable model.
+
+Elastic Net Regression:
+This plot is showing combined behaviors of Ridge and Lasso. It is shrinking coefficients like Ridge but also zeroing out some coefficients like Lasso, depending on the mixing parameter α. Elastic Net is particularly useful when dealing with groups of correlated features and can handle datasets with more predictors than observations.
+
+In summary, Lasso and Elastic Net can zero out coefficients, effectively performing feature selection, unlike Ridge. Ridge deals better with multicollinearity through shrinkage of coefficients, whereas Lasso may ignore some correlated predictors entirely.
+Also, Ridge maintains all the features, Lasso simplifies the model by eliminating some, and Elastic Net offers a balance depending on the alpha setting.
+
+As for the preference:
+If feature selection is crucial and we prefer a simpler model, Lasso might be preferred due to its ability to automatically eliminate less important predictors.
+If multicollinearity is a concern and we want to maintain all features while reducing their magnitudes, Ridge regression could be suitable.
+However, considering the complexities of sports statistics datasets, where both feature correlations and the importance of individual predictors can vary, Elastic Net might be the most suitable approach. It provides a balanced solution, leveraging the strengths of both Ridge and Lasso, and offers flexibility in controlling the model complexity while retaining important features.
+
+
+
+c) Run a ridge, lasso, and elastic net regression using the “best” λ (and α for elastic net) value (the one that minimizes the test errors) and report the corresponding coefficients. How do these values compare to the coefficient estimates in Problem 2?
+
+```{r}
+# Ridge regression
+set.seed(123)
+ridge.best <- cv.glmnet(x, y, alpha=0)
+ridge.auto <- glmnet(x,y,alpha=0,lambda=ridge.best$lambda.min)
+ridge.auto$beta
+```
+
+```{r}
+set.seed(123)
+lasso.best <- cv.glmnet(x ,y ,alpha=1)
+lasso.auto <- glmnet(x, y ,alpha=1,lambda=lasso.best$lambda.min)
+lasso.auto$beta
+```
+
+```{r}
+
+set.seed(123)
+train_control <- trainControl(method = 'repeatedcv', number = 5, repeats = 5, search = 'random', verboseIter = FALSE)
+
+# Performing elastic net regression with cross-validation
+elastic_net_best <- train(Salary ~ .,
+                          data = Hitters,
+                          method = 'glmnet',
+                          preProcess = c('center', 'scale'),
+                          tuneLength = 25,
+                          trControl = train_control)
+
+elastic_net_model <- glmnet(x ,y , alpha=elastic_net_best$bestTune$alpha, lambda=elastic_net_best$bestTune$lambda)
+elastic_net_model$beta
+
+```
+Comparing these coefficients to the ones obtained from Problem 2, we observe some similarities and differences. For instance, the coefficients for variables such as "AtBat," "Hits," "Walks," "CRuns," "CRBI," "CWalks," "LeagueN," "DivisionW," and "PutOuts" are consistently present across all models and are in the same order of magnitude. In all stepwise models, 'Hits' consistently appears as a strong positive predictor (around 6.85 to 6.92), similar to its high impact in the lasso and elastic net models.
+
+In ridge model,almost all predictors remain in the model but their coefficients are significantly shrunk, with 'DivisionW' showing a major negative impact on the salary. However, there are differences in the coefficients of some variables, particularly in the Lasso model where some coefficients are shrunk to zero like 'HmRun', 'Runs', and 'RBI', indicating variable selection where Hits and Walks appear influential. Additionally, the coefficients obtained from the ElasticNet model show a mix of continuous and sparse coefficients, reflecting its combined L1 and L2 regularization. Variables like 'HmRun' are shrunk to a smaller positive coefficient (0.123) and 'CHits' has been zeroed out marking as less significant variables.
+
+In summary, while there are differences in the specific coefficients across the different regularization techniques, the overall patterns and associations between predictors and the response variable remain consistent, demonstrating the robustness of the models in capturing the underlying relationships in the data.
