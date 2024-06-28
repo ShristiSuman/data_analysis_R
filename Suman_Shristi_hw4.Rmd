@@ -1,0 +1,446 @@
+---
+title: "Suman_Shristi_hw4"
+output: pdf_document
+date: "2024-05-24"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#install.packages("mgcv") 
+#install.packages("gam")
+#install.packages("readr")
+library(ISLR)
+library(MASS)
+library(caret)
+library(leaps)
+library(mgcv)
+library(gam)
+library(class) 
+library(dplyr)
+library(readr)
+library(scales)
+```
+
+##Problem 1: Classification
+
+a) Create a binary variable, mpg01, that contains a 1 if mpg contains a value above its median, and a 0 if mpg contains a value below its median. You can compute the median using the median() function.
+
+```{r}
+data("Auto")
+mpg01 = ifelse(Auto$mpg > median(Auto$mpg), 1, 0)
+Auto$mpg01 = mpg01
+head(Auto)
+```
+
+b) Explore the data graphically in order to investigate the association between mpg01 and the other variables. Which of the other variables seem most likely to be useful in predicting mpg01? Describe your findings.
+
+```{r}
+par(mfrow = c(2, 3))
+
+plot(factor(Auto$mpg01), Auto$cylinders, ylab = "cylinders")
+plot(factor(Auto$mpg01), Auto$displacement, ylab = "displacement")
+plot(factor(Auto$mpg01), Auto$horsepower, ylab = "Horsepower")
+plot(factor(Auto$mpg01), Auto$weight, ylab = "Weight")
+plot(factor(Auto$mpg01), Auto$acceleration, ylab = "Acceleration")
+plot(factor(Auto$mpg01), Auto$year, ylab = "year")
+
+```
+Based on the examination of the boxplots to explore the relationship between mpg01 and other variables, following insights cab be observed. Most notably, vehicles with higher fuel efficiency, as indicated by mpg01, are frequently equipped with four-cylinder engines and demonstrate characteristics such as lighter weight, smaller engine size, and lower horsepower. While there were some distinctions in acceleration and model year between cars with higher and lower mpg, these differences were not as distinct as those related to engine size, weight, and horsepower. Interestingly, there was considerable overlap in acceleration times and manufacturing years across both mpg groups, suggesting that these factors are less reliable for predicting mpg. Consequently, based on this analysis, it can be concluded that the most reliable predictors for mpg01 include the number of cylinders, engine displacement, horsepower, and vehicle weight.
+
+```{r}
+par(mfrow = c(2, 3))
+plot(Auto$cylinders, Auto$mpg01, xlab = "cylinders")
+plot(Auto$displacement, Auto$mpg01, xlab = "displacement")
+plot(Auto$horsepower, Auto$mpg01, xlab = "Horsepower")
+plot(Auto$weight, Auto$mpg01, xlab = "Weight")
+plot(Auto$acceleration, Auto$mpg01, xlab = "Acceleration")
+plot(Auto$year, Auto$mpg01, xlab = "year")
+
+```
+
+The scatterplot analysis reinforces the significance of horsepower and weight in predicting mpg01, depicting a trend where vehicles with higher mpg generally concentrate at lower values of these variables, while those with lower mpg tend to cluster at higher values. In the case of cylinders, the scatterplot exhibits some overlap due to the restricted range of engine configurations, encompassing vehicles from both mpg categories. Likewise, for engine displacement, numerous vehicles with below-median mpg ratings are situated within the lower quartile of displacement. Despite these instances of overlap, both variables will remain under consideration in subsequent analyses alongside other factors.
+
+```{r}
+# Creating a copy of the Auto data frame
+new_Auto <- Auto
+
+# Assigning string labels to the 'origin' in the new data frame
+new_Auto$origin[new_Auto$origin == 1] <- "American"
+new_Auto$origin[new_Auto$origin == 2] <- "European"
+new_Auto$origin[new_Auto$origin == 3] <- "Japanese"
+
+# Converting the 'origin' column to a factor
+new_Auto$origin <- as.factor(new_Auto$origin)
+
+# Plotting and analyzing using the new data frame 
+plot(new_Auto$origin, new_Auto$mpg, xlab = "Origin", ylab = "MPG", main = "MPG by Car Origin")
+abline(h = median(new_Auto$mpg), lwd = 2, col = "red")  # Adding a horizontal line at the median mpg
+
+```
+A distinct discrepancy in fuel efficiency is evident among car origins, with American vehicles typically displaying mpg ratings below the median, while European and Japanese cars frequently surpass the median mpg. This trend indicates that the origin of a car could serve as a significant factor in predicting mpg01.
+
+```{r}
+numeric_data <- Auto[, sapply(Auto, is.numeric)]
+
+# Calculating the correlation matrix
+correlation_matrix <- cor(numeric_data)
+
+correlation_matrix
+
+```
+The correlation matrix reinforces our observations, indicating significant impacts of cylinders, displacement, horsepower, and weight on mpg01. While origin also plays a role in affecting mpg01, its influence appears to be relatively less pronounced compared to these other variables.
+
+
+c) Split the data into a training set and a test set. Perform LDA on the training data in order to predict mpg01 using the variables from the second part of this problem. What is the test error of the model?
+```{r}
+
+set.seed(123)
+train = sort(sample(nrow(Auto), nrow(Auto)*.7))
+Auto.train=Auto[train,]
+Auto.test<-Auto[-train,]
+mpg01.test=mpg01[-train]
+dim(Auto.train)
+dim(Auto.test)
+
+```
+```{r}
+
+set.seed(123)
+lda.fit = lda(mpg01 ~ cylinders + weight + displacement + horsepower, data = Auto, subset = train)
+lda.pred = predict(lda.fit, Auto.test)
+lda.error <- mean(lda.pred$class != mpg01.test)
+
+cat("LDA Test Error: ", lda.error, "\n")
+
+```
+The dataset is split into two subsets: a training set, which encompasses 70% of the data, and a test set, constituting the remaining 30%. Linear Discriminant Analysis (LDA) is conducted on the training set to forecast the binary outcome mpg01, employing the most influential variables identified from previous analysis—namely, cylinders, weight, displacement, and horsepower.
+
+The test error rate for this model is approximately 11.01%. A lower test error rate signifies superior model performance, implying that the selected features serve as effective predictors of the outcome variable mpg01.
+
+
+d) Repeat the previous problem using logistic regression. What is the test error of the model?
+
+```{r}
+
+set.seed(123)
+glm.fit <-  glm(mpg01 ~ cylinders + weight + displacement + horsepower,
+              data = Auto,
+              family = binomial,
+              subset = train)
+glm.probs <-  predict(glm.fit, Auto.test, type = "response")
+glm.pred <-  rep(0, length(glm.probs))
+glm.pred[glm.probs > 0.5] <- 1
+logistic.error <- mean(glm.pred != mpg01.test)
+
+cat("Logistic Regression Test Error: ", logistic.error, "\n")
+```
+
+
+e) Repeat the previous problem using KNN. What is the test error of the model? Which value of K seems to perform the best on this dataset?
+
+```{r}
+# Trying different values of K
+errors <- sapply(1:20, function(k) {
+  knn.pred <- knn(train = Auto.train[, c("cylinders", "weight", "displacement", "horsepower")],
+                  test = Auto.test[, c("cylinders", "weight", "displacement", "horsepower")],
+                  cl = Auto.train$mpg01, k = k)
+  mean(knn.pred != Auto.test$mpg01)
+})
+
+# Find the best K and error
+best_k <- which.min(errors)
+best_knn_error <- min(errors)
+
+cat("Best K for KNN: ", best_k, "\n")
+cat("KNN Test Error with best K: ", best_knn_error, "\n")
+
+```
+
+
+
+##Problem 2: Beyond linear
+
+a) Describe the contents of the dataset. What do the variables describe?
+```{r}
+# Loading the College dataset
+data("College")
+
+# Viewing the first few rows of the dataset
+head(College)
+```
+The College dataset contains information about various colleges in the United States. It consists of 777 observations on 18 variables. Here is a description of each variable:
+
+1) Private: A factor with levels "Yes" and "No" indicating whether the college is private or public university.
+2) Apps: Number of applications received.
+3) Accept: Number of applications accepted.
+4) Enroll: Number of new students enrolled.
+5) Top10perc: Percentage of new students from the top 10% of their high school class.
+6) Top25perc: Percentage of new students from the top 25% of their high school class.
+7) F.Undergrad: Number of full-time undergraduates.
+8) P.Undergrad: Number of part-time undergraduates.
+9) Outstate: Out-of-state tuition.
+10) Room.Board: Room and board costs.
+11) Books: Estimated book costs.
+12) Personal: Estimated personal spending.
+13) PhD: Percentage of faculty with Ph.D.’s.
+14) Terminal: Percentage of faculty with terminal degree.
+15) S.F.Ratio: Student/faculty ratio.
+16) perc.alumni: Percentage of alumni who donate.
+17) Expend: Instructional expenditure per student.
+18) Grad.Rate: Graduation rate.
+
+Each row in the dataset represents a different college, and each variable provides specific information about that college. For example, "Apps" indicates the number of applications the college received, "Accept" indicates the number of applications accepted, "Enroll" indicates the number of students enrolled, and so on.
+
+
+b) Split the data into a training set and a test set. Using out-of-state tuition as the response and other variables as the predictors, perform forward stepwise selection on the training set in order to identify a satisfactory model that uses just a subset of the predictors.
+
+```{r}
+
+# Setting seed for reproducibility
+set.seed(123)
+
+# Creating training and test sets
+trainIndex <- createDataPartition(College$Outstate, p = .7, list = FALSE)
+train_data <- College[trainIndex, ]
+test_data <- College[-trainIndex, ]
+
+```
+
+```{r}
+# Performing forward stepwise selection 
+forward_subset <- regsubsets(Outstate ~ ., data = train_data, nvmax = ncol(College)-1, method = "forward")
+model_summary <- summary(forward_subset)
+```
+
+```{r}
+
+best_subset_within_1se <- function(metric, reverse = FALSE) {
+  if (reverse) {
+    metric_1se <- max(metric) - (sd(metric) / sqrt(length(metric)))
+    min_subset <- which(metric > metric_1se)[1]
+  } else {
+    metric_1se <- min(metric) + (sd(metric) / sqrt(length(metric)))
+    min_subset <- which(metric < metric_1se)[1]
+  }
+  return(min_subset)
+}
+
+
+best_cp_subset <- best_subset_within_1se(model_summary$cp)
+best_bic_subset <- best_subset_within_1se(model_summary$bic)
+best_adjr2_subset <- best_subset_within_1se(model_summary$adjr2, reverse = TRUE)
+
+
+cat("For Cp metric the best subset within 1 standard error is:\n")
+cat("Number of variables:", best_cp_subset, "\n")
+cat("Variables:", names(coef(forward_subset, best_cp_subset)), "\n\n")
+
+cat("For BIC metric, the best subset within 1 standard error is:\n")
+cat("Number of variables:", best_bic_subset, "\n")
+cat("Variables:", names(coef(forward_subset, best_bic_subset)), "\n\n")
+
+cat("For Adjusted R2 metric, the best subset within 1 standard error is:\n")
+cat("Number of variables:", best_adjr2_subset, "\n")
+cat("Variables:", names(coef(forward_subset, best_adjr2_subset)), "\n")
+```
+The best subset is found to be 6 from the above graphs:
+```{r}
+# The best subset  is found to be 6
+coef(forward_subset, 6)
+```
+
+
+
+c) Fit a GAM on the training data, using out-of-state tuition as the response and the features selected in the previous step as the predictors. Plot the results, and explain your findings.
+```{r}
+set.seed(123)
+trainIndex <- sample(nrow(College) * 0.7)
+train_data <- College[trainIndex, ]
+test_data <- College[-trainIndex, ]
+
+# Fitting a GAM model using selected features
+gam_model <- gam(Outstate ~ Private + s(Room.Board, df=2) + s(perc.alumni, df=2) + s(PhD, df=2) + s(Expend, df=2) + s(Grad.Rate, df=2), data=train_data)
+
+# Plotting the results
+par(mfrow = c(2, 3))  
+plot(gam_model, se = TRUE, col = "orange")  
+```
+
+The explanation of findings are as follows:
+1) Private colleges(Yes) have significantly higher out-of-state tuition compared to public colleges (No).The effect is seen as large and positive for private colleges, indicating that being a private college increases the out-of-state tuition significantly.
+Also, the confidence intervals (dashed lines) do not overlap, indicating a statistically significant difference.
+
+2) There is a positive, slightly non-linear relationship between room and board costs and out-of-state tuition. As Room.Board increases, Outstate tuition tends to increase as well. The confidence intervals suggest that this relationship is significant, especially in the middle range of Room.Board values.
+
+3) The relationship between PhD percentage and out-of-state tuition is slightly non-linear but overall positive. The effect is more pronounced for higher values of PhD. The confidence intervals suggest that the relationship is significant across the range of values.
+
+4) There is a positive relationship between the percentage of alumni donations and out-of-state tuition. The relationship appears linear, as indicated by the effective degrees of freedom (edf) being close to 1. The confidence intervals suggest this relationship is significant.
+
+5) There is a strong, non-linear relationship between expenditures and out-of-state tuition. Initially, as Expend increases, Outstate tuition increases rapidly, but this effect levels off at higher expenditure levels. The confidence intervals are tight, indicating a strong and significant effect.
+
+6) The relationship between graduation rate and out-of-state tuition is slightly non-linear. There is a positive trend, suggesting that higher graduation rates are associated with higher out-of-state tuition. The confidence intervals suggest that this effect is significant.
+
+
+
+d) Evaluate the model obtained on the test set, and explain the results obtained.
+
+```{r}
+# Make predictions on the test set
+predictions <- predict(gam_model, newdata = test_data)
+
+# Calculate evaluation metrics
+rmse <- sqrt(mean((test_data$Outstate - predictions)^2))
+mae <- mean(abs(test_data$Outstate - predictions))
+r_squared <- 1 - sum((test_data$Outstate - predictions)^2) / sum((test_data$Outstate - mean(test_data$Outstate))^2)
+
+# Print the evaluation metrics
+print(paste("Root Mean Squared Error (RMSE) on test set:", rmse))
+print(paste("Mean Absolute Error (MAE) on test set:", mae))
+print(paste("R-squared on test set:", r_squared))
+
+```
+The evaluation metrics obtained from the model on the test set are as follows:
+
+1) Root Mean Squared Error (RMSE): RMSE measures the average deviation of the predicted values from the actual values. In this case, the RMSE value of approximately 1907.54 indicates that, on average, the predicted Outstate values deviate from the actual values by around $1907.54.
+
+2) Mean Absolute Error (MAE): MAE also measures the average magnitude of errors in a set of predictions, without considering their direction. Here, the MAE value of approximately 1450.79 suggests that, on average, the predictions differ from the actual values by around $1450.79.
+
+3) R-squared (R²): R-squared is a measure of how well the model explains the variance in the dependent variable. It ranges from 0 to 1, where 1 indicates a perfect fit. The R-squared value of approximately 0.792 suggests that the model explains about 79.21% of the variance in the Outstate variable, which is quite decent.
+
+Lower values of RMSE and MAE indicate better model performance as they give us an idea of the average error between the predicted and actual Outstate values. In this case, while the RMSE and MAE are not extremely low, they are still relatively reasonable, considering the range and nature of the Outstate variable.
+The R-squared value of approximately 0.792 indicates that the model explains a significant portion of the variance in the Outstate variable. This suggests that the predictors included in the model (Private, Room.Board, PhD, perc.alumni, Expend, Grad.Rate) collectively have a good explanatory power for predicting Outstate.
+
+
+e) For which variables, if any, is there evidence of a non-linear relationship with the response?
+
+```{r}
+summary(gam_model)
+```
+
+The "Anova for Nonparametric Effects" section provides insights into evidence of a non-linear relationship between the predictor variables and the response variable (Outstate). The p value has been observed to be higher than 0.05 for perc.alumni. However,for other variables it is less than 0.05. Expend and PhD show a strong evidence of a non-linear relationship. Additionally, it suggests a moderately strong non-linear relationship between the response variable and the predictors Room.Board and Grad.Rate.
+
+
+##Problem 3: Cluster that Credit!
+
+a) Scale the entire dataset (minus the CUST_ID variable) and drop all NA’s from the data.
+
+```{r}
+# Loading the dataset
+data <- read.csv("cc_data.csv")
+
+# Dropping the CUST_ID column
+data <- select(data, -CUST_ID)
+
+# Dropping rows with any NA values
+data <- na.omit(data)
+
+# Scaling the dataset
+scaled_data <- as.data.frame(scale(data))
+
+# Viewing the scaled data
+head(scaled_data)
+```
+
+
+b) Using k-means clustering, cluster the data using 1 up to 20 clusters and plot the total within-sum-of-squares (withinss). Using the elbow method, how many clusters would you estimate should be used for the dataset?
+
+```{r}
+# Performing k-means clustering for 1 to 20 clusters and calculating withinss
+wss <- sapply(1:20, function(k) {
+  kmeans(scaled_data, centers = k, nstart = 20)$tot.withinss
+})
+
+# Creating a data frame for plotting
+elbow_data <- data.frame(
+  k = 1:20,
+  wss = wss
+)
+
+# Plotting the elbow method graph
+ggplot(elbow_data, aes(x = k, y = wss)) +
+  geom_line() +
+  geom_point() +
+  ggtitle("Elbow Method for Optimal Clusters") +
+  xlab("Number of Clusters (k)") +
+  ylab("Total Within-Cluster Sum of Squares (WSS)")
+```
+```{r}
+optimal_clusters <- which.min(diff(diff(wss))) + 1
+optimal_clusters
+```
+From the graph, we can see the elbow point to be around 9 clusters. This observation is supported by the second derivative method, which identifies where the rate of change of the WSS is most significant. The above code "which.min(diff(diff(wss))) + 1" verifies this and indicates that the optimal number of clusters to be 9.
+
+
+c) Given the k-number of clusters determined in the previous question, how many data elements are contained within each cluster? Would this be a balanced or unbalanced set of clusters?
+
+```{r}
+# Optimal number of clusters (replacing 'k' with the determined optimal number)
+optimal_clusters <- 9
+
+# Performing k-means clustering
+set.seed(123) # Set seed for reproducibility
+kmeans_result <- kmeans(scaled_data, centers = optimal_clusters, nstart = 20)
+
+# Counting the number of data elements in each cluster
+cluster_counts <- table(kmeans_result$cluster)
+
+# Displaying the counts
+cat("Count of clusters is")
+print(cluster_counts)
+```
+The distribution of clusters is found to be unbalanced. Clusters 7, 8, and 9 have notably fewer data points compared to the others, with cluster 9 having just 24 members. This indicates that the clustering process has resulted in a few clusters with very small sizes, suggesting an overall unbalanced cluster set.
+
+
+d) Provide a plot of the average balance, credit limit, and payments in each cluster and a qualitative interpretation of some differences between the clusters.
+
+```{r}
+data$cluster <- kmeans_result$cluster
+
+# Calculating averages for each cluster
+cluster_averages <- data %>%
+  group_by(cluster) %>%
+  summarize(
+    avg_balance = mean(BALANCE),
+    avg_credit_limit = mean(CREDIT_LIMIT),
+    avg_payments = mean(PAYMENTS)
+  )
+
+# Plotting average balance for each cluster
+ggplot(cluster_averages, aes(x = factor(cluster), y = avg_balance)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Average Balance per Cluster") +
+  xlab("Cluster") +
+  ylab("Average Balance")
+
+# Plotting average credit limit for each cluster
+ggplot(cluster_averages, aes(x = factor(cluster), y = avg_credit_limit)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Average Credit Limit per Cluster") +
+  xlab("Cluster") +
+  ylab("Average Credit Limit")
+
+# Plotting average payments for each cluster
+ggplot(cluster_averages, aes(x = factor(cluster), y = avg_payments)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Average Payments per Cluster") +
+  xlab("Cluster") +
+  ylab("Average Payments")
+```
+
+Cluster 9 stands out for its affluent and creditworthy clientele. Members of this cluster exhibit notably higher average balances, credit limits, and payments compared to those in other clusters. It is likely comprised of high-net-worth individuals with exceptional credit records and considerable spending capacity, positioning them as the most valuable customers for the bank.
+
+On the other end of the spectrum, Cluster 1 encompasses customers with the most restricted financial means and creditworthiness. The remarkably low average balances, credit limits, and payments within this cluster indicate a demographic characterized by modest income levels, potential credit difficulties, or a cautious attitude towards credit utilization. These customers may represent higher-risk segments or individuals at the initial stages of building credit history for the bank.
+
+Clusters 8 and 7, while not reaching the same level of affluence as Cluster 9, exhibit comparatively high average balances, credit limits, and payments. These customers possess strong financial profiles and demonstrate a propensity for active credit utilization, suggesting they are well-suited for premium banking services or specialized credit products.
+
+Clusters 5 and 6, positioned in the mid-range, likely constitute the bank's central customer demographic, showcasing average credit profiles and spending habits. These customers could potentially benefit from tailored marketing initiatives or incentives aimed at enhancing their involvement and allegiance to the bank.
+
+Significantly, the disparity in average balances among clusters appears to be more conspicuous than the variation in credit limits. This implies that factors beyond credit limits, such as individual spending patterns, income levels, or financial management strategies, play a pivotal role in shaping account balances.
+
+Moreover, the distribution of average payments closely aligns with that of average balances. This suggests a correlation between spending habits and repayment patterns, indicating potential insights for informing risk management strategies and credit assessment procedures.
+
+
+
